@@ -100,6 +100,7 @@ int main(int argc, char **argv, char **envp) {
             }
             waitid(P_PID, pid, 0, WEXITED);
         }
+        free(argv_cmd);
     }
     return 0;
 }
