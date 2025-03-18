@@ -6,24 +6,14 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
+#define LSTD_DSA
+#define LSTD_NOPREFIX
+#include "lstd.h"
 
-// thanks chatgpt lol, this is just not the challenge this is supposed to be
-// so i just asked chatgpt :3
-char **split_string(const char *str, int *count, const char *needle) {
-    char *temp = strdup(str);
-    char *token;
-    char **result = NULL;
-    int size = 0;
-    token = strtok(temp, needle);
-    while (token) {
-        result = realloc(result, (size + 1) * sizeof(char *));
-        result[size] = strdup(token);
-        size++;
-        token = strtok(NULL, needle);
-    }
-    free(temp);
-    *count = size;
-    return result;
+char **split_string(char *str, char needle, int *count) {
+    dynamic_string_array ds = string_split(str, needle);
+    *count = ds.count;
+    return ds.data;
 }
 
 int last_occurence(const char *str, char needle) {
@@ -42,7 +32,7 @@ int main(int argc, char **argv, char **envp) {
     char full_command[MAX_CMD_SIZE];
     char *PATH = getenv("PATH");
     int path_count;
-    char **BIN = split_string(PATH, &path_count, ":");
+    char **BIN = split_string(PATH, ':', &path_count);
     int changed_path = 0;
     for (;;) {
         if (changed_path) {
@@ -55,7 +45,7 @@ int main(int argc, char **argv, char **envp) {
         int count = read(STDIN_FILENO, full_command, 255);
         full_command[count - 1] = 0;
         int args_count;
-        argv_cmd = split_string(full_command, &args_count, " ");
+        argv_cmd = split_string(full_command, ' ', &args_count);
         int pid = fork();
         if (pid == 0) {
             if (strcmp(argv_cmd[0], "cd") == 0) {
